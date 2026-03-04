@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MaidSmart Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'DM Sans', sans-serif; background: #f8f9fb; display: flex; height: 100vh; overflow: hidden; }
+
+.sidebar { width: 240px; background: linear-gradient(180deg, #1a1a2e, #16213e); display: flex; flex-direction: column; padding: 24px 0; flex-shrink: 0; }
+.sidebar-logo { padding: 0 24px; margin-bottom: 40px; }
+.logo-row { display: flex; align-items: center; gap: 10px; }
+.logo-icon { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #E8922A, #f0a848); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.logo-maid { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: #fff; }
+.logo-smart { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: #E8922A; }
+.sidebar-label { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 6px; letter-spacing: 1.5px; text-transform: uppercase; }
+.nav { flex: 1; }
+.nav-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 24px; border: none; cursor: pointer; background: transparent; border-left: 3px solid transparent; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+.nav-btn.active { background: rgba(232,146,42,0.15); border-left-color: #E8922A; }
+.nav-btn .icon { font-size: 18px; }
+.nav-btn .label { font-size: 14px; color: rgba(255,255,255,0.5); }
+.nav-btn.active .label { color: #E8922A; font-weight: 600; }
+
+.main { flex: 1; overflow: auto; padding: 32px; }
+.page-title { font-size: 28px; font-weight: 800; color: #1a1a2e; font-family: 'Space Grotesk', sans-serif; margin-bottom: 4px; }
+.page-sub { font-size: 14px; color: #94a3b8; margin-bottom: 28px; }
+
+.card { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; margin-bottom: 20px; }
+.card-title { font-size: 16px; font-weight: 700; color: #1a1a2e; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+
+.btn { padding: 8px 16px; border-radius: 10px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+.btn-primary { background: #2D7DD2; color: #fff; }
+.btn-primary:hover { background: #2568b0; }
+.btn-accent { background: #E8922A; color: #fff; }
+.btn-accent:hover { background: #d07e1f; }
+.btn-danger { background: #fef2f2; color: #ef4444; }
+.btn-danger:hover { background: #fee2e2; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-outline { background: #fff; border: 1px solid #e2e8f0; color: #64748b; }
+.btn-outline:hover { border-color: #2D7DD2; color: #2D7DD2; }
+
+.form-row { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-end; }
+.form-group { flex: 1; }
+.form-label { font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 4px; display: block; }
+.form-input { width: 100%; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 14px; font-family: 'DM Sans', sans-serif; color: #1a1a2e; outline: none; transition: border-color 0.2s; }
+.form-input:focus { border-color: #2D7DD2; }
+select.form-input { cursor: pointer; }
+
+.table { width: 100%; border-collapse: collapse; }
+.table th { text-align: left; font-size: 12px; font-weight: 600; color: #94a3b8; padding: 8px 12px; border-bottom: 1px solid #f1f5f9; text-transform: uppercase; letter-spacing: 0.5px; }
+.table td { padding: 12px; border-bottom: 1px solid #f8fafc; font-size: 14px; color: #334155; vertical-align: top; }
+.table tr:hover { background: #fafafa; }
+
+.badge { padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; display: inline-block; }
+.badge-blue { background: #eff6ff; color: #2D7DD2; }
+.badge-green { background: #f0fdf4; color: #22c55e; }
+.badge-orange { background: #fff7ed; color: #E8922A; }
+.badge-gray { background: #f8fafc; color: #94a3b8; }
+.badge-purple { background: #faf5ff; color: #a855f7; }
+
+.chip { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; background: #f1f5f9; color: #64748b; margin: 2px; }
+
+.checkbox-list { max-height: 180px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px; }
+.checkbox-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; color: #334155; }
+.checkbox-item:hover { background: #f8fafc; }
+.checkbox-item input { accent-color: #2D7DD2; }
+.checkbox-item .sub { font-size: 11px; color: #94a3b8; }
+
+.qr-card { display: inline-block; background: #fff; border: 1px solid #f1f5f9; border-radius: 14px; padding: 16px; margin: 8px; text-align: center; width: 200px; vertical-align: top; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.qr-card img { width: 150px; height: 150px; margin-bottom: 10px; }
+.qr-card .qr-name { font-size: 13px; font-weight: 700; color: #1a1a2e; }
+.qr-card .qr-sub { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+.qr-card .qr-copy { margin-top: 8px; }
+
+.empty-state { text-align: center; padding: 40px; color: #94a3b8; }
+.empty-icon { font-size: 32px; margin-bottom: 8px; }
+.empty-text { font-size: 14px; }
+
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a2e; color: #fff; padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 500; display: none; z-index: 200; animation: fadeUp 0.3s ease; }
+.toast.visible { display: block; }
+
+.tab { display: none; }
+.tab.active { display: block; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 3px; }
+
+@media print {
+  body { background: #fff; }
+  .sidebar, .nav, .page-title, .page-sub, .toast { display: none !important; }
+  .card:first-child { display: none !important; }
+  .main { padding: 10px; overflow: visible; }
+  .card { box-shadow: none; border: none; padding: 0; }
+  .qr-card { break-inside: avoid; border: 1px solid #ddd; margin: 6px; }
+  .btn { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-row">
+      <div class="logo-icon">💡</div>
+      <div><span class="logo-maid">Maid</span><span class="logo-smart">Smart</span></div>
+    </div>
+    <div class="sidebar-label">Admin Panel</div>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active" data-tab="sites"><span class="icon">🏥</span><span class="label">Sites</span></button>
+    <button class="nav-btn" data-tab="restrooms"><span class="icon">🚻</span><span class="label">Restrooms</span></button>
+    <button class="nav-btn" data-tab="contacts"><span class="icon">👤</span><span class="label">Contacts</span></button>
+    <button class="nav-btn" data-tab="qr"><span class="icon">📱</span><span class="label">QR Codes</span></button>
+  </nav>
+</aside>
+
+<main class="main">
+  <h1 class="page-title" id="pageTitle">Sites</h1>
+  <p class="page-sub" id="pageSub">Manage hospitals and facilities</p>
+
+  <!-- Sites -->
+  <div class="tab active" id="tab-sites">
+    <div class="card">
+      <div class="card-title">Add New Site</div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Site Name</label><input class="form-input" id="newSiteName" placeholder="e.g. Penn Hospital"></div>
+        <div class="form-group"><label class="form-label">Address</label><input class="form-input" id="newSiteAddress" placeholder="e.g. Philadelphia, PA"></div>
+        <button class="btn btn-primary" onclick="addSite()">+ Add Site</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">All Sites <span class="badge badge-blue" id="siteCount">0</span></div>
+      <table class="table"><thead><tr><th>Name</th><th>Address</th><th>Restrooms</th><th>Contacts</th><th>Created</th><th></th></tr></thead>
+      <tbody id="sitesTable"></tbody></table>
+    </div>
+  </div>
+
+  <!-- Restrooms -->
+  <div class="tab" id="tab-restrooms">
+    <div class="card">
+      <div class="card-title">Add New Restroom</div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Site</label><select class="form-input" id="rrSite"></select></div>
+        <div class="form-group"><label class="form-label">Room Name</label><input class="form-input" id="rrName" placeholder="e.g. Restroom 17003"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Label</label><input class="form-input" id="rrLabel" placeholder="e.g. Men's East Wing"></div>
+        <div class="form-group"><label class="form-label">Floor</label><input class="form-input" id="rrFloor" placeholder="e.g. 7th Floor"></div>
+        <button class="btn btn-primary" onclick="addRestroom()">+ Add</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Bulk Import Restrooms</div>
+      <p style="font-size:13px;color:#64748b;margin-bottom:12px">Upload a CSV file to add multiple restrooms at once. The CSV should have columns: <strong>name, label, floor</strong> (label and floor are optional).</p>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Site</label><select class="form-input" id="bulkSite"></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">CSV File</label>
+          <input type="file" accept=".csv,.txt" id="csvFile" class="form-input" style="padding:8px">
+        </div>
+        <button class="btn btn-accent" onclick="uploadCSV()">📤 Import CSV</button>
+        <button class="btn btn-outline btn-sm" onclick="downloadTemplate()">📥 Template</button>
+      </div>
+      <div style="margin-top:8px">
+        <p style="font-size:12px;color:#94a3b8">Or paste CSV data directly:</p>
+        <textarea class="form-input" id="csvPaste" rows="4" placeholder="name,label,floor&#10;Restroom 101,Mens Lobby,1st Floor&#10;Restroom 102,Womens Lobby,1st Floor" style="margin-top:6px;font-size:13px;font-family:monospace;resize:vertical"></textarea>
+        <div style="margin-top:8px"><button class="btn btn-accent btn-sm" onclick="importPaste()">📤 Import from Paste</button></div>
+      </div>
+      <div id="bulkStatus" style="margin-top:12px;font-size:13px;display:none"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">All Restrooms <span class="badge badge-blue" id="rrCount">0</span></div>
+      <div class="form-row" style="margin-bottom:16px">
+        <div class="form-group"><label class="form-label">Filter by Site</label>
+          <select class="form-input" id="rrFilterSite" onchange="renderRestrooms()"><option value="">All Sites</option></select></div>
+      </div>
+      <table class="table"><thead><tr><th>Room</th><th>Label</th><th>Floor</th><th>Site</th><th></th></tr></thead>
+      <tbody id="restroomsTable"></tbody></table>
+    </div>
+  </div>
+
+  <!-- Contacts -->
+  <div class="tab" id="tab-contacts">
+    <div class="card">
+      <div class="card-title">Add New Contact</div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="contactName" placeholder="e.g. John Smith"></div>
+        <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="contactPhone" placeholder="e.g. +12155551234"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Role</label>
+          <select class="form-input" id="contactRole" onchange="toggleContactMode()">
+            <option value="worker">Worker — assigned to specific rooms</option>
+            <option value="manager">Manager — all alerts for a site</option>
+            <option value="dispatch">Dispatch — all alerts for a site</option>
+          </select>
+        </div>
+      </div>
+      <!-- Worker: pick rooms -->
+      <div id="workerAssign">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Filter rooms by site</label>
+            <select class="form-input" id="contactSiteFilter" onchange="filterContactRooms()"><option value="">All Sites</option></select></div>
+        </div>
+        <label class="form-label">Assign to Restrooms (check all that apply)</label>
+        <div class="checkbox-list" id="contactRoomList"></div>
+      </div>
+      <!-- Manager/Dispatch: pick site -->
+      <div id="managerAssign" style="display:none">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Assign to Site (receives all alerts)</label>
+            <select class="form-input" id="contactSite"></select></div>
+        </div>
+      </div>
+      <div style="margin-top:16px"><button class="btn btn-primary" onclick="addContact()">+ Add Contact</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title">All Contacts <span class="badge badge-blue" id="contactCount">0</span></div>
+      <table class="table"><thead><tr><th>Name</th><th>Phone</th><th>Role</th><th>Assignment</th><th></th></tr></thead>
+      <tbody id="contactsTable"></tbody></table>
+    </div>
+  </div>
+
+  <!-- QR Codes -->
+  <div class="tab" id="tab-qr">
+    <div class="card">
+      <div class="card-title">Generate QR Codes</div>
+      <p style="font-size:14px;color:#64748b;margin-bottom:16px">Select a site to generate printable QR codes for all its restrooms. Each QR code links through your Vercel redirect — never needs reprinting even if you change platforms.</p>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Site</label>
+          <select class="form-input" id="qrSite" onchange="renderQR()"></select></div>
+        <button class="btn btn-accent" onclick="window.print()">🖨️ Print All</button>
+        <button class="btn btn-outline" onclick="copyAllLinks()">📋 Copy All Links</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">QR Codes</div>
+      <div id="qrGrid"></div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SB="https://lidntffmgtctjgiusgww.supabase.co";
+const KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZG50ZmZtZ3RjdGpnaXVzZ3d3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODM3OTAsImV4cCI6MjA4ODE1OTc5MH0.qhh0OArxEMaK0I0PudtdLqZC63CzVsafysaYKHkbbAA";
+const FB="https://maidsmart-api.vercel.app/feedback.html";
+const QR="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=";
+const hd={apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json",Prefer:"return=representation"};
+
+let sites=[],restrooms=[],contacts=[],crLinks=[];
+
+async function sbGet(t,q=""){return(await fetch(SB+"/rest/v1/"+t+q,{headers:{apikey:KEY,Authorization:"Bearer "+KEY}})).json();}
+async function sbPost(t,b){return(await fetch(SB+"/rest/v1/"+t,{method:"POST",headers:hd,body:JSON.stringify(b)})).json();}
+async function sbDel(t,q){await fetch(SB+"/rest/v1/"+t+q,{method:"DELETE",headers:hd});}
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("visible");setTimeout(()=>t.classList.remove("visible"),2500);}
+function fbUrl(id){return FB+"?r="+id;}
+
+async function loadData(){
+  [sites,restrooms,contacts,crLinks]=await Promise.all([
+    sbGet("sites","?order=name.asc"),sbGet("restrooms","?order=name.asc"),
+    sbGet("contacts","?order=name.asc"),sbGet("contact_restrooms","")]);
+  renderAll();
+}
+function renderAll(){renderSites();renderRestrooms();renderContacts();updateDropdowns();renderQR();}
+
+// ═══ SITES ═══
+function renderSites(){
+  document.getElementById("siteCount").textContent=sites.length;
+  const tb=document.getElementById("sitesTable");
+  if(!sites.length){tb.innerHTML='<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">🏥</div><div class="empty-text">No sites yet. Add your first hospital.</div></div></td></tr>';return;}
+  tb.innerHTML=sites.map(s=>{
+    const rc=restrooms.filter(r=>r.site_id===s.id).length;
+    const cc=contacts.filter(c=>c.site_id===s.id).length;
+    return`<tr><td><strong>${s.name}</strong></td><td>${s.address||"—"}</td>
+    <td><span class="badge badge-blue">${rc} rooms</span></td>
+    <td><span class="badge badge-green">${cc}</span></td>
+    <td style="font-size:12px;color:#94a3b8">${new Date(s.created_at).toLocaleDateString()}</td>
+    <td><button class="btn btn-sm btn-danger" onclick="delSite('${s.id}')">Delete</button></td></tr>`;}).join("");
+}
+async function addSite(){
+  const n=document.getElementById("newSiteName").value.trim(),a=document.getElementById("newSiteAddress").value.trim();
+  if(!n)return toast("Enter a site name");
+  const r=await sbPost("sites",{name:n,address:a,user_id:"a1000000-0000-0000-0000-000000000001"});
+  if(r?.length){sites.push(r[0]);renderAll();document.getElementById("newSiteName").value="";document.getElementById("newSiteAddress").value="";toast("Site added: "+n);}
+}
+async function delSite(id){if(!confirm("Delete this site and all its restrooms?"))return;await sbDel("sites","?id=eq."+id);sites=sites.filter(s=>s.id!==id);restrooms=restrooms.filter(r=>r.site_id!==id);renderAll();toast("Site deleted");}
+
+// ═══ RESTROOMS ═══
+function renderRestrooms(){
+  const f=document.getElementById("rrFilterSite")?.value||"";
+  const fl=f?restrooms.filter(r=>r.site_id===f):restrooms;
+  document.getElementById("rrCount").textContent=restrooms.length;
+  const tb=document.getElementById("restroomsTable");
+  if(!fl.length){tb.innerHTML='<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">🚻</div><div class="empty-text">No restrooms yet.</div></div></td></tr>';return;}
+  tb.innerHTML=fl.map(r=>{const s=sites.find(x=>x.id===r.site_id);
+    return`<tr><td><strong>${r.name}</strong></td><td>${r.label||"—"}</td><td>${r.floor||"—"}</td>
+    <td><span class="badge badge-gray">${s?s.name:"—"}</span></td>
+    <td><button class="btn btn-sm btn-danger" onclick="delRR('${r.id}')">Delete</button></td></tr>`;}).join("");
+}
+async function addRestroom(){
+  const sid=document.getElementById("rrSite").value,n=document.getElementById("rrName").value.trim(),
+    l=document.getElementById("rrLabel").value.trim(),f=document.getElementById("rrFloor").value.trim();
+  if(!sid)return toast("Select a site");if(!n)return toast("Enter a room name");
+  const r=await sbPost("restrooms",{name:n,label:l,floor:f,site_id:sid});
+  if(r?.length){restrooms.push(r[0]);renderAll();document.getElementById("rrName").value="";document.getElementById("rrLabel").value="";document.getElementById("rrFloor").value="";toast("Restroom added: "+n);}
+}
+async function delRR(id){if(!confirm("Delete this restroom?"))return;await sbDel("restrooms","?id=eq."+id);restrooms=restrooms.filter(r=>r.id!==id);renderAll();toast("Restroom deleted");}
+
+// ═══ CONTACTS ═══
+function toggleContactMode(){
+  const role=document.getElementById("contactRole").value;
+  document.getElementById("workerAssign").style.display=role==="worker"?"block":"none";
+  document.getElementById("managerAssign").style.display=role!=="worker"?"block":"none";
+}
+function filterContactRooms(){
+  const sid=document.getElementById("contactSiteFilter")?.value||"";
+  const fl=sid?restrooms.filter(r=>r.site_id===sid):restrooms;
+  document.getElementById("contactRoomList").innerHTML=fl.map(r=>{
+    const s=sites.find(x=>x.id===r.site_id);
+    return`<label class="checkbox-item"><input type="checkbox" value="${r.id}">
+    <div>${r.name}${r.label?" — "+r.label:""} <span class="sub">${s?s.name:""}</span></div></label>`;}).join("");
+}
+function renderContacts(){
+  document.getElementById("contactCount").textContent=contacts.length;
+  const tb=document.getElementById("contactsTable");
+  if(!contacts.length){tb.innerHTML='<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">👤</div><div class="empty-text">No contacts yet.</div></div></td></tr>';return;}
+  tb.innerHTML=contacts.map(c=>{
+    const role=c.role||"worker";
+    const rb=role==="manager"?'<span class="badge badge-orange">Manager</span>':role==="dispatch"?'<span class="badge badge-purple">Dispatch</span>':'<span class="badge badge-blue">Worker</span>';
+    let asgn="";
+    if(role==="worker"){
+      const links=crLinks.filter(l=>l.contact_id===c.id);
+      const rms=links.map(l=>restrooms.find(r=>r.id===l.restroom_id)).filter(Boolean);
+      asgn=rms.length?rms.map(r=>`<span class="chip">${r.name}${r.label?" — "+r.label:""}</span>`).join(""):'<span style="color:#94a3b8;font-size:12px">None</span>';
+    }else{const s=sites.find(x=>x.id===c.site_id);asgn=s?`<span class="chip">🏥 All rooms — ${s.name}</span>`:'<span style="color:#94a3b8;font-size:12px">No site</span>';}
+    return`<tr><td><strong>${c.name}</strong></td><td>${c.phone}</td><td>${rb}</td><td>${asgn}</td>
+    <td><button class="btn btn-sm btn-danger" onclick="delContact('${c.id}')">Delete</button></td></tr>`;}).join("");
+}
+async function addContact(){
+  const name=document.getElementById("contactName").value.trim(),phone=document.getElementById("contactPhone").value.trim(),
+    role=document.getElementById("contactRole").value;
+  if(!name)return toast("Enter a name");if(!phone)return toast("Enter a phone number");
+  let site_id=null;
+  if(role!=="worker"){site_id=document.getElementById("contactSite").value;if(!site_id)return toast("Select a site");}
+  const r=await sbPost("contacts",{name,phone,role,site_id});
+  if(!r?.length)return toast("Failed to add");
+  const nc=r[0];contacts.push(nc);
+  if(role==="worker"){
+    const checked=[...document.querySelectorAll("#contactRoomList input:checked")].map(cb=>cb.value);
+    if(checked.length){
+      for(const rid of checked){const cr=await sbPost("contact_restrooms",{contact_id:nc.id,restroom_id:rid});if(cr?.length)crLinks.push(cr[0]);}
+    }
+  }
+  renderAll();document.getElementById("contactName").value="";document.getElementById("contactPhone").value="";toast("Contact added: "+name);
+}
+async function delContact(id){if(!confirm("Delete this contact?"))return;
+  await sbDel("contact_restrooms","?contact_id=eq."+id);await sbDel("contacts","?id=eq."+id);
+  contacts=contacts.filter(c=>c.id!==id);crLinks=crLinks.filter(l=>l.contact_id!==id);renderAll();toast("Contact deleted");}
+
+// ═══ QR CODES ═══
+function renderQR(){
+  const sid=document.getElementById("qrSite")?.value||"";
+  const fl=sid?restrooms.filter(r=>r.site_id===sid):[];
+  const grid=document.getElementById("qrGrid");
+  if(!fl.length){grid.innerHTML='<div class="empty-state"><div class="empty-icon">📱</div><div class="empty-text">Select a site to generate QR codes</div></div>';return;}
+  const site=sites.find(s=>s.id===sid);
+  grid.innerHTML=fl.map(r=>{
+    const url=fbUrl(r.id);
+    return`<div class="qr-card">
+      <img src="${QR}${encodeURIComponent(url)}" alt="QR">
+      <div class="qr-name">${r.label||r.name}</div>
+      <div class="qr-sub">${r.name}${r.floor?" • "+r.floor:""}</div>
+      <div class="qr-sub">${site?site.name:""}</div>
+      <div class="qr-copy"><button class="btn btn-sm btn-outline" onclick="copyText('${url}')">📋 Copy</button></div>
+    </div>`;}).join("");
+}
+function copyAllLinks(){
+  const sid=document.getElementById("qrSite")?.value||"";
+  const fl=sid?restrooms.filter(r=>r.site_id===sid):restrooms;
+  copyText(fl.map(r=>(r.label||r.name)+" ("+r.name+")\n"+fbUrl(r.id)).join("\n\n"));toast("All links copied!");
+}
+function copyText(t){navigator.clipboard.writeText(t).then(()=>toast("Copied!")).catch(()=>{const a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();document.execCommand("copy");document.body.removeChild(a);toast("Copied!");});}
+
+// ═══ DROPDOWNS ═══
+function updateDropdowns(){
+  const so=sites.map(s=>`<option value="${s.id}">${s.name}</option>`).join("");
+  document.getElementById("rrSite").innerHTML='<option value="">Select site...</option>'+so;
+  document.getElementById("rrFilterSite").innerHTML='<option value="">All Sites</option>'+so;
+  document.getElementById("qrSite").innerHTML='<option value="">Select site...</option>'+so;
+  document.getElementById("contactSiteFilter").innerHTML='<option value="">All Sites</option>'+so;
+  document.getElementById("contactSite").innerHTML='<option value="">Select site...</option>'+so;
+  document.getElementById("bulkSite").innerHTML='<option value="">Select site...</option>'+so;
+  filterContactRooms();
+}
+
+// ═══ BULK IMPORT ═══
+function parseCSV(text){
+  const lines=text.trim().split("\n").map(l=>l.trim()).filter(l=>l);
+  if(!lines.length)return[];
+  // Check if first line is header
+  const first=lines[0].toLowerCase();
+  const hasHeader=first.includes("name")||first.includes("room")||first.includes("label")||first.includes("floor");
+  const start=hasHeader?1:0;
+  const rows=[];
+  for(let i=start;i<lines.length;i++){
+    const cols=lines[i].split(",").map(c=>c.trim().replace(/^["']|["']$/g,""));
+    if(cols[0]){rows.push({name:cols[0],label:cols[1]||"",floor:cols[2]||""});}
+  }
+  return rows;
+}
+
+async function bulkImport(rows,siteId){
+  const status=document.getElementById("bulkStatus");
+  status.style.display="block";
+  status.style.color="#2D7DD2";
+  status.textContent=`Importing ${rows.length} restrooms...`;
+  let added=0,failed=0;
+  for(const row of rows){
+    try{
+      const r=await sbPost("restrooms",{name:row.name,label:row.label,floor:row.floor,site_id:siteId});
+      if(r?.length){restrooms.push(r[0]);added++;}else{failed++;}
+    }catch(e){failed++;}
+    status.textContent=`Importing... ${added} added, ${failed} failed of ${rows.length}`;
+  }
+  status.style.color=failed?"#E8922A":"#22c55e";
+  status.textContent=`Done! ${added} restrooms added${failed?" ("+failed+" failed)":""}`;
+  renderAll();
+  toast(added+" restrooms imported!");
+}
+
+async function uploadCSV(){
+  const siteId=document.getElementById("bulkSite").value;
+  if(!siteId)return toast("Select a site first");
+  const file=document.getElementById("csvFile").files[0];
+  if(!file)return toast("Select a CSV file");
+  const text=await file.text();
+  const rows=parseCSV(text);
+  if(!rows.length)return toast("No valid rows found in CSV");
+  if(!confirm(`Import ${rows.length} restrooms to ${sites.find(s=>s.id===siteId)?.name}?`))return;
+  await bulkImport(rows,siteId);
+  document.getElementById("csvFile").value="";
+}
+
+async function importPaste(){
+  const siteId=document.getElementById("bulkSite").value;
+  if(!siteId)return toast("Select a site first");
+  const text=document.getElementById("csvPaste").value;
+  if(!text.trim())return toast("Paste CSV data first");
+  const rows=parseCSV(text);
+  if(!rows.length)return toast("No valid rows found");
+  if(!confirm(`Import ${rows.length} restrooms to ${sites.find(s=>s.id===siteId)?.name}?`))return;
+  await bulkImport(rows,siteId);
+  document.getElementById("csvPaste").value="";
+}
+
+function downloadTemplate(){
+  const csv="name,label,floor\nRestroom 101,Mens Lobby,1st Floor\nRestroom 102,Womens Lobby,1st Floor\nRestroom 201,Mens East Wing,2nd Floor\nRestroom 202,Womens East Wing,2nd Floor\nRestroom 301,Cafeteria,3rd Floor";
+  const blob=new Blob([csv],{type:"text/csv"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="maidsmart-restrooms-template.csv";a.click();
+  toast("Template downloaded!");
+}
+
+// ═══ TABS ═══
+const titles={sites:"Sites",restrooms:"Restrooms",contacts:"Contacts",qr:"QR Codes"};
+const subs={sites:"Manage hospitals and facilities",restrooms:"Manage restrooms per site",contacts:"Workers, managers, and dispatch",qr:"Generate printable QR codes"};
+document.querySelectorAll(".nav-btn").forEach(b=>{b.addEventListener("click",()=>{
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(x=>x.classList.remove("active"));
+  const tab=b.dataset.tab;document.getElementById("tab-"+tab).classList.add("active");b.classList.add("active");
+  document.getElementById("pageTitle").textContent=titles[tab];document.getElementById("pageSub").textContent=subs[tab];
+});});
+
+loadData();
+</script>
+</body>
+</html>

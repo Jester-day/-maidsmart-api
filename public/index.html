@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MaidSmart Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'DM Sans', sans-serif; background: #f8f9fb; display: flex; height: 100vh; overflow: hidden; }
+
+/* Sidebar */
+.sidebar { width: 240px; background: linear-gradient(180deg, #1a1a2e, #16213e); display: flex; flex-direction: column; padding: 24px 0; flex-shrink: 0; }
+.sidebar-logo { padding: 0 24px; margin-bottom: 40px; }
+.logo-row { display: flex; align-items: center; gap: 10px; }
+.logo-icon { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #E8922A, #f0a848); display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 12px rgba(232,146,42,0.3); }
+.logo-text { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; }
+.logo-maid { color: #fff; }
+.logo-smart { color: #E8922A; }
+.site-name { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 6px; letter-spacing: 1.5px; text-transform: uppercase; }
+.nav { flex: 1; }
+.nav-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 24px; border: none; cursor: pointer; background: transparent; border-left: 3px solid transparent; transition: all 0.2s; }
+.nav-btn.active { background: rgba(232,146,42,0.15); border-left-color: #E8922A; }
+.nav-btn span.icon { font-size: 18px; }
+.nav-btn span.label { font-size: 14px; color: rgba(255,255,255,0.5); }
+.nav-btn.active span.label { color: #E8922A; font-weight: 600; }
+.nav-badge { font-size: 9px; font-weight: 700; color: #E8922A; background: rgba(232,146,42,0.15); padding: 2px 6px; border-radius: 4px; }
+.sidebar-bottom { padding: 0 24px; }
+.refresh-btn { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.5); font-size: 13px; cursor: pointer; margin-bottom: 12px; font-family: 'DM Sans', sans-serif; }
+.user-card { padding: 12px 16px; border-radius: 12px; background: rgba(255,255,255,0.05); }
+.user-label { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 4px; }
+.user-name { font-size: 14px; font-weight: 600; color: #fff; }
+.user-role { font-size: 11px; color: rgba(255,255,255,0.25); }
+
+/* Main */
+.main { flex: 1; overflow: auto; padding: 32px; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+.header h1 { font-size: 28px; font-weight: 800; color: #1a1a2e; font-family: 'Space Grotesk', sans-serif; }
+.header p { font-size: 14px; color: #94a3b8; margin-top: 4px; }
+.date-badge { padding: 8px 16px; border-radius: 10px; background: #fff; border: 1px solid #e2e8f0; font-size: 13px; color: #64748b; }
+
+/* Stats */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; animation: fadeUp 0.4s ease both; }
+.stat-card:nth-child(2) { animation-delay: 0.1s; }
+.stat-card:nth-child(3) { animation-delay: 0.2s; }
+.stat-card:nth-child(4) { animation-delay: 0.3s; }
+.stat-top { display: flex; justify-content: space-between; align-items: flex-start; }
+.stat-label { font-size: 13px; color: #94a3b8; font-weight: 500; margin-bottom: 8px; }
+.stat-value { font-size: 32px; font-weight: 800; color: #1a1a2e; font-family: 'Space Grotesk', sans-serif; }
+.stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+
+/* Charts Row */
+.charts-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.chart-card { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; }
+.chart-title { font-size: 15px; font-weight: 700; color: #1a1a2e; margin-bottom: 20px; }
+.bars { display: flex; align-items: flex-end; gap: 12px; height: 180px; }
+.bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; }
+.bar-val { font-size: 12px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+.bar { width: 70%; border-radius: 6px 6px 2px 2px; min-height: 4px; transition: height 0.8s ease; }
+.bar-label { font-size: 10px; color: #94a3b8; margin-top: 8px; text-align: center; }
+
+/* Response Time */
+.response-card { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.response-card .chart-title { align-self: flex-start; margin-bottom: 4px; }
+.response-sub { font-size: 13px; color: #94a3b8; align-self: flex-start; margin-bottom: 20px; }
+.big-number { font-size: 56px; font-weight: 800; color: #2D7DD2; font-family: 'Space Grotesk', sans-serif; line-height: 1; }
+.big-unit { font-size: 24px; font-weight: 600; }
+.big-label { font-size: 13px; color: #94a3b8; margin-top: 4px; margin-bottom: 20px; }
+.stats-row { display: flex; gap: 24px; width: 100%; justify-content: center; border-top: 1px solid #f1f5f9; padding-top: 16px; }
+.mini-stat { text-align: center; }
+.mini-val { font-size: 22px; font-weight: 700; }
+.mini-label { font-size: 11px; color: #94a3b8; }
+.divider { width: 1px; background: #f1f5f9; }
+
+/* Weekly */
+.week-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.week-badge { background: #eff6ff; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; color: #2D7DD2; }
+.week-bars { display: flex; align-items: flex-end; gap: 8px; height: 160px; }
+.week-bar { width: 65%; border-radius: 6px 6px 2px 2px; background: linear-gradient(180deg, #2D7DD2, #5b9fe6); opacity: 0.8; min-height: 4px; transition: height 0.6s ease; }
+
+/* Feed */
+.feed-card { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; }
+.feed-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.feed-title { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+.view-all { border: none; background: none; color: #2D7DD2; font-size: 13px; font-weight: 600; cursor: pointer; }
+.feed-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f8fafc; }
+.feed-item:last-child { border-bottom: none; }
+.feed-emoji { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-right: 14px; flex-shrink: 0; }
+.feed-content { flex: 1; }
+.feed-type { font-size: 14px; font-weight: 600; color: #1a1a2e; }
+.feed-meta { font-size: 12px; color: #94a3b8; }
+.badge { padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+.badge-dot { width: 6px; height: 6px; border-radius: 3px; display: inline-block; }
+.badge-open { background: #fef2f2; color: #ef4444; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 12px; }
+.badge-done { background: #f0fdf4; color: #22c55e; }
+
+/* Restrooms */
+.search-bar { background: #fff; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; border: 1px solid #e2e8f0; }
+.search-bar input { border: none; outline: none; flex: 1; font-size: 14px; color: #1a1a2e; background: transparent; font-family: 'DM Sans', sans-serif; }
+.rooms-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.room-card { background: #fff; border-radius: 16px; padding: 20px; border: 1px solid #f1f5f9; box-shadow: 0 1px 3px rgba(0,0,0,0.04); cursor: pointer; transition: all 0.2s; }
+.room-card:hover { border-color: rgba(232,146,42,0.25); transform: translateY(-2px); }
+.room-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.room-name { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+.room-sub { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+.status-dot { width: 10px; height: 10px; border-radius: 5px; }
+.room-stats { display: flex; gap: 16px; }
+.room-stat-val { font-size: 20px; font-weight: 700; color: #1a1a2e; }
+.room-stat-label { font-size: 11px; color: #94a3b8; }
+.room-last { margin-left: auto; text-align: right; }
+.room-last-label { font-size: 12px; color: #94a3b8; }
+.room-last-val { font-size: 13px; font-weight: 600; color: #64748b; }
+
+/* Filters */
+.filters { display: flex; gap: 8px; margin-bottom: 20px; }
+.filter-btn { padding: 6px 14px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.filter-btn.active { border-color: #2D7DD2; background: #eff6ff; color: #2D7DD2; }
+.export-btn { padding: 8px 16px; border-radius: 10px; border: none; background: #2D7DD2; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; margin-left: auto; font-family: 'DM Sans', sans-serif; }
+.response-time { font-size: 12px; color: #94a3b8; margin-right: 16px; }
+
+/* Beta */
+.beta-card { background: #fff; border-radius: 16px; padding: 48px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; text-align: center; max-width: 500px; margin: 60px auto; }
+.beta-icon { font-size: 48px; margin-bottom: 16px; }
+.beta-title { font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; }
+.beta-desc { font-size: 14px; color: #94a3b8; line-height: 1.6; margin-bottom: 24px; }
+.beta-badge { padding: 10px 24px; border-radius: 10px; display: inline-block; background: linear-gradient(135deg, #E8922A, #f0a848); color: #fff; font-size: 14px; font-weight: 600; }
+
+.tab { display: none; }
+.tab.active { display: block; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-row">
+      <div class="logo-icon">💡</div>
+      <div><span class="logo-text logo-maid">Maid</span><span class="logo-text logo-smart">Smart</span></div>
+    </div>
+    <div class="site-name" id="siteName">Loading...</div>
+  </div>
+  <nav class="nav" id="nav">
+    <button class="nav-btn active" data-tab="dashboard"><span class="icon">📊</span><span class="label">Dashboard</span></button>
+    <button class="nav-btn" data-tab="restrooms"><span class="icon">🚻</span><span class="label">Restrooms</span></button>
+    <button class="nav-btn" data-tab="feedback"><span class="icon">📋</span><span class="label">Feedback</span></button>
+    <button class="nav-btn" data-tab="rooms"><span class="icon">🏥</span><span class="label">Patient Rooms</span><span class="nav-badge">BETA</span></button>
+    <button class="nav-btn" data-tab="settings"><span class="icon">⚙️</span><span class="label">Settings</span></button>
+  </nav>
+  <div class="sidebar-bottom">
+    <button class="refresh-btn" onclick="loadData()">🔄 Refresh Data</button>
+    <div class="user-card">
+      <div class="user-label">Logged in as</div>
+      <div class="user-name">Chad Vazquez</div>
+      <div class="user-role">EVS Manager</div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="header">
+    <div>
+      <h1 id="pageTitle">Dashboard</h1>
+      <p id="pageSubtitle">Real-time overview of your facility</p>
+    </div>
+    <div class="date-badge" id="dateBadge"></div>
+  </div>
+
+  <!-- Dashboard Tab -->
+  <div class="tab active" id="tab-dashboard">
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="charts-grid">
+      <div class="chart-card"><div class="chart-title">Feedback Breakdown</div><div class="bars" id="barChart"></div></div>
+      <div class="chart-card response-card">
+        <div class="chart-title">Response Time</div>
+        <div class="response-sub">Average resolution speed</div>
+        <div class="big-number" id="avgTime">0<span class="big-unit"> min</span></div>
+        <div class="big-label">avg response</div>
+        <div class="stats-row" id="resolveStats"></div>
+      </div>
+      <div class="chart-card">
+        <div class="week-header"><div class="chart-title" style="margin:0">This Week</div><div class="week-badge" id="weekTotal">0 total</div></div>
+        <div class="week-bars" id="weekChart"></div>
+      </div>
+    </div>
+    <div class="feed-card">
+      <div class="feed-header"><div class="feed-title">Recent Feedback</div><button class="view-all" onclick="switchTab('feedback')">View All →</button></div>
+      <div id="recentFeed"></div>
+    </div>
+  </div>
+
+  <!-- Restrooms Tab -->
+  <div class="tab" id="tab-restrooms">
+    <div class="search-bar"><span>🔍</span><input type="text" placeholder="Search restrooms..." id="roomSearch" oninput="renderRestrooms()"></div>
+    <div class="rooms-grid" id="roomsGrid"></div>
+  </div>
+
+  <!-- Feedback Tab -->
+  <div class="tab" id="tab-feedback">
+    <div class="feed-card">
+      <div class="filters" id="filters"></div>
+      <div id="feedbackList"></div>
+    </div>
+  </div>
+
+  <!-- Patient Rooms Tab -->
+  <div class="tab" id="tab-rooms">
+    <div class="beta-card">
+      <div class="beta-icon">🏥</div>
+      <div class="beta-title">Patient Rooms</div>
+      <div class="beta-desc">Expanding MaidSmart beyond restrooms. Get instant feedback on patient room cleanliness after discharge, track turnover times, and improve HCAHPS scores.</div>
+      <div class="beta-badge">Coming Soon</div>
+    </div>
+  </div>
+
+  <!-- Settings Tab -->
+  <div class="tab" id="tab-settings">
+    <div style="max-width:600px">
+      <div class="chart-card" style="margin-bottom:16px">
+        <div class="chart-title">Notification Settings</div>
+        <div id="settingsToggles"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Account</div>
+        <div style="font-size:14px;color:#334155;margin-bottom:8px">Chad Vazquez</div>
+        <div style="font-size:13px;color:#94a3b8;margin-bottom:4px">chadvbusiness@gmail.com</div>
+        <div style="font-size:13px;color:#94a3b8" id="accountSite">Honickman Center • Sodexo</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const SUPABASE_URL = "https://lidntffmgtctjgiusgww.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZG50ZmZtZ3RjdGpnaXVzZ3d3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODM3OTAsImV4cCI6MjA4ODE1OTc5MH0.qhh0OArxEMaK0I0PudtdLqZC63CzVsafysaYKHkbbAA";
+
+let feedbackData = [];
+let restroomsData = [];
+let siteData = null;
+let currentFilter = "All";
+
+const meta = {
+  "Great Job!": { emoji: "👍", color: "#22c55e", bg: "#f0fdf4" },
+  "Soap or Paper Needed": { emoji: "🧴", color: "#eab308", bg: "#fefce8" },
+  "Report Leak": { emoji: "💧", color: "#3b82f6", bg: "#eff6ff" },
+  "Clean-up is Needed": { emoji: "🧹", color: "#a855f7", bg: "#faf5ff" },
+  "Toilet is Clogged": { emoji: "🚽", color: "#ec4899", bg: "#fdf2f8" },
+};
+const getMeta = t => meta[t] || { emoji: "📋", color: "#64748b", bg: "#f8fafc" };
+
+function timeAgo(d) {
+  if (!d) return "";
+  const diff = Date.now() - new Date(d).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "just now";
+  if (m < 60) return m + "m ago";
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + "h ago";
+  return Math.floor(h / 24) + "d ago";
+}
+
+async function sbFetch(table, query = "") {
+  const r = await fetch(SUPABASE_URL + "/rest/v1/" + table + query, {
+    headers: { apikey: SUPABASE_KEY, Authorization: "Bearer " + SUPABASE_KEY }
+  });
+  return r.json();
+}
+
+async function sbPatch(table, id, body) {
+  await fetch(SUPABASE_URL + "/rest/v1/" + table + "?id=eq." + id, {
+    method: "PATCH",
+    headers: { apikey: SUPABASE_KEY, Authorization: "Bearer " + SUPABASE_KEY, "Content-Type": "application/json", Prefer: "return=representation" },
+    body: JSON.stringify(body)
+  });
+}
+
+async function loadData() {
+  try {
+    const [fb, rooms, sites] = await Promise.all([
+      sbFetch("feedback", "?order=created_at.desc"),
+      sbFetch("restrooms", "?order=name.asc"),
+      sbFetch("sites", "?limit=1"),
+    ]);
+    feedbackData = fb || [];
+    restroomsData = rooms || [];
+    siteData = sites && sites[0] ? sites[0] : null;
+    render();
+  } catch (e) { console.error("Load error:", e); }
+}
+
+function render() {
+  const today = new Date().toDateString();
+  const todayFb = feedbackData.filter(f => new Date(f.created_at).toDateString() === today);
+  const open = feedbackData.filter(f => !f.completed && f.feedback_type !== "Great Job!");
+  const resolved = feedbackData.filter(f => f.completed);
+
+  document.getElementById("dateBadge").textContent = "📅 " + new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  document.getElementById("siteName").textContent = siteData ? siteData.name : "MaidSmart";
+
+  // Stats
+  const stats = [
+    { label: "Today's Reports", value: todayFb.length, icon: "📈", bg: "#eff6ff" },
+    { label: "Open Issues", value: open.length, icon: "⚠️", bg: "#fef2f2" },
+    { label: "Active Rooms", value: restroomsData.length, icon: "🚪", bg: "#f5f3ff" },
+    { label: "All Time", value: feedbackData.length, icon: "📊", bg: "#fff7ed" },
+  ];
+  document.getElementById("statsGrid").innerHTML = stats.map(s => `
+    <div class="stat-card"><div class="stat-top"><div><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>
+    <div class="stat-icon" style="background:${s.bg}">${s.icon}</div></div></div>`).join("");
+
+  // Bar chart
+  const types = ["Great Job!", "Soap or Paper Needed", "Report Leak", "Clean-up is Needed", "Toilet is Clogged"];
+  const labels = ["Great Job", "Supplies", "Leak", "Clean-up", "Clogged"];
+  const colors = ["#22c55e", "#eab308", "#3b82f6", "#a855f7", "#ec4899"];
+  const counts = types.map(t => feedbackData.filter(f => f.feedback_type === t).length);
+  const maxCount = Math.max(...counts, 1);
+  document.getElementById("barChart").innerHTML = counts.map((c, i) => `
+    <div class="bar-group"><div class="bar-val">${c}</div>
+    <div class="bar" style="height:${(c/maxCount)*100}%;background:${colors[i]}"></div>
+    <div class="bar-label">${labels[i]}</div></div>`).join("");
+
+  // Response time
+  const times = feedbackData.filter(f => f.completed && f.time_completed && f.feedback_type !== "Great Job!")
+    .map(f => (new Date(f.time_completed) - new Date(f.created_at)) / 60000).filter(t => t > 0 && t < 1440);
+  const avg = times.length > 0 ? Math.round(times.reduce((a, b) => a + b, 0) / times.length) : 0;
+  const rate = (resolved.length + open.length) > 0 ? Math.round(resolved.length / (resolved.length + open.length) * 100) : 0;
+  document.getElementById("avgTime").innerHTML = avg + '<span class="big-unit"> min</span>';
+  document.getElementById("resolveStats").innerHTML = `
+    <div class="mini-stat"><div class="mini-val" style="color:#22c55e">${resolved.length}</div><div class="mini-label">Resolved</div></div>
+    <div class="divider"></div>
+    <div class="mini-stat"><div class="mini-val" style="color:#ef4444">${open.length}</div><div class="mini-label">Open</div></div>
+    <div class="divider"></div>
+    <div class="mini-stat"><div class="mini-val" style="color:#2D7DD2">${rate}%</div><div class="mini-label">Rate</div></div>`;
+
+  // Weekly
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const weekCounts = [0, 0, 0, 0, 0, 0, 0];
+  const now = new Date();
+  feedbackData.forEach(f => { const d = new Date(f.created_at); if ((now - d) / 86400000 < 7) weekCounts[d.getDay()]++; });
+  const weekMax = Math.max(...weekCounts, 1);
+  const weekTotal = weekCounts.reduce((a, b) => a + b, 0);
+  document.getElementById("weekTotal").textContent = weekTotal + " total";
+  document.getElementById("weekChart").innerHTML = days.map((d, i) => `
+    <div class="bar-group"><div class="bar-val" style="font-size:11px">${weekCounts[i]}</div>
+    <div class="week-bar" style="height:${(weekCounts[i]/weekMax)*100}%"></div>
+    <div class="bar-label">${d}</div></div>`).join("");
+
+  // Recent feed
+  renderFeed("recentFeed", feedbackData.slice(0, 6));
+
+  // Restrooms
+  renderRestrooms();
+
+  // Feedback tab
+  renderFeedbackTab();
+
+  // Settings
+  document.getElementById("settingsToggles").innerHTML = ["SMS Alerts (Twilio)", "Push Notifications (Pushover)", "Email Reports"].map(s => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #f8fafc">
+    <span style="font-size:14px;color:#334155">${s}</span>
+    <div style="width:44px;height:24px;border-radius:12px;background:#22c55e;position:relative;cursor:pointer">
+    <div style="width:20px;height:20px;border-radius:10px;background:#fff;position:absolute;top:2px;right:2px;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></div></div></div>`).join("");
+  document.getElementById("accountSite").textContent = (siteData ? siteData.name : "") + " • Sodexo";
+}
+
+function renderFeed(containerId, items) {
+  document.getElementById(containerId).innerHTML = items.map(f => {
+    const m = getMeta(f.feedback_type);
+    const isOpen = !f.completed && f.feedback_type !== "Great Job!";
+    const badgeLabel = f.feedback_type === "Great Job!" ? "Positive" : "Done";
+    return `<div class="feed-item">
+      <div class="feed-emoji" style="background:${m.bg}">${m.emoji}</div>
+      <div class="feed-content"><div class="feed-type">${f.feedback_type}</div><div class="feed-meta">${f.restroom_name || "Unknown"} • ${timeAgo(f.created_at)}</div></div>
+      ${isOpen
+        ? `<button class="badge badge-open" onclick="resolveItem('${f.id}')"><span class="badge-dot" style="background:#ef4444"></span>Open</button>`
+        : `<div class="badge badge-done"><span class="badge-dot" style="background:#22c55e"></span>${badgeLabel}</div>`}
+    </div>`;
+  }).join("");
+}
+
+function renderRestrooms() {
+  const q = (document.getElementById("roomSearch")?.value || "").toLowerCase();
+  const roomStats = restroomsData.map(r => {
+    const fb = feedbackData.filter(f => f.restroom_id === r.id);
+    const openCount = fb.filter(f => !f.completed && f.feedback_type !== "Great Job!").length;
+    const last = fb[0];
+    return { ...r, count: fb.length, open: openCount, last: last ? timeAgo(last.created_at) : "No activity" };
+  }).filter(r => r.name.toLowerCase().includes(q) || (r.label || "").toLowerCase().includes(q) || (r.floor || "").toLowerCase().includes(q));
+
+  document.getElementById("roomsGrid").innerHTML = roomStats.map(r => `
+    <div class="room-card"><div class="room-top"><div><div class="room-name">${r.label || r.name}</div><div class="room-sub">${r.name} • ${r.floor || "N/A"}</div></div>
+    <div class="status-dot" style="background:${r.open > 0 ? "#ef4444" : "#22c55e"};box-shadow:0 0 8px ${r.open > 0 ? "rgba(239,68,68,0.4)" : "rgba(34,197,94,0.4)"}"></div></div>
+    <div class="room-stats"><div><div class="room-stat-val">${r.count}</div><div class="room-stat-label">Reports</div></div>
+    <div><div class="room-stat-val" style="color:${r.open > 0 ? "#ef4444" : "#22c55e"}">${r.open}</div><div class="room-stat-label">Open</div></div>
+    <div class="room-last"><div class="room-last-label">Last activity</div><div class="room-last-val">${r.last}</div></div></div></div>`).join("");
+}
+
+function renderFeedbackTab() {
+  const filterDiv = document.getElementById("filters");
+  filterDiv.innerHTML = ["All", "Open", "Resolved", "Positive"].map(f =>
+    `<button class="filter-btn ${currentFilter === f ? "active" : ""}" onclick="setFilter('${f}')">${f}</button>`
+  ).join("") + '<button class="export-btn">📥 Export CSV</button>';
+
+  let filtered = feedbackData;
+  if (currentFilter === "Open") filtered = feedbackData.filter(f => !f.completed && f.feedback_type !== "Great Job!");
+  if (currentFilter === "Resolved") filtered = feedbackData.filter(f => f.completed && f.feedback_type !== "Great Job!");
+  if (currentFilter === "Positive") filtered = feedbackData.filter(f => f.feedback_type === "Great Job!");
+
+  document.getElementById("feedbackList").innerHTML = filtered.map(f => {
+    const m = getMeta(f.feedback_type);
+    const isOpen = !f.completed && f.feedback_type !== "Great Job!";
+    const rt = f.time_completed && f.feedback_type !== "Great Job!" ? Math.round((new Date(f.time_completed) - new Date(f.created_at)) / 60000) : null;
+    const badgeLabel = f.feedback_type === "Great Job!" ? "Positive" : "Done";
+    return `<div class="feed-item">
+      <div class="feed-emoji" style="background:${m.bg}">${m.emoji}</div>
+      <div class="feed-content"><div class="feed-type">${f.feedback_type}</div><div class="feed-meta">${f.restroom_name || "Unknown"} • ${new Date(f.created_at).toLocaleString()}</div></div>
+      ${rt && rt > 0 ? `<div class="response-time">⏱ ${rt} min</div>` : ""}
+      ${isOpen
+        ? `<button class="badge badge-open" onclick="resolveItem('${f.id}')"><span class="badge-dot" style="background:#ef4444"></span>Open</button>`
+        : `<div class="badge badge-done"><span class="badge-dot" style="background:#22c55e"></span>${badgeLabel}</div>`}
+    </div>`;
+  }).join("");
+}
+
+function setFilter(f) { currentFilter = f; renderFeedbackTab(); }
+
+async function resolveItem(id) {
+  await sbPatch("feedback", id, { completed: true, time_completed: new Date().toISOString() });
+  feedbackData = feedbackData.map(f => f.id === id ? { ...f, completed: true, time_completed: new Date().toISOString() } : f);
+  render();
+}
+
+function switchTab(tabId) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("tab-" + tabId).classList.add("active");
+  document.querySelector(`[data-tab="${tabId}"]`).classList.add("active");
+  const titles = { dashboard: "Dashboard", restrooms: "Restrooms", feedback: "Feedback Log", rooms: "Patient Rooms", settings: "Settings" };
+  const subs = { dashboard: `Real-time overview • ${feedbackData.length} total entries`, restrooms: `${restroomsData.length} restrooms active`, feedback: `${feedbackData.length} entries`, rooms: "Coming soon", settings: "" };
+  document.getElementById("pageTitle").textContent = titles[tabId];
+  document.getElementById("pageSubtitle").textContent = subs[tabId];
+}
+
+document.querySelectorAll(".nav-btn").forEach(btn => {
+  btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+});
+
+loadData();
+</script>
+</body>
+</html>
