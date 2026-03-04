@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#faf8f5">
+<title>MaidSmart Feedback</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #faf8f5;
+  --card: #ffffff;
+  --text: #1a1a2e;
+  --sub: #8a8a9a;
+  --border: #eee9e2;
+  --accent: #E8922A;
+  --accent-glow: rgba(232,146,42,0.15);
+  --green: #22c55e;
+  --yellow: #eab308;
+  --blue: #3b82f6;
+  --purple: #a855f7;
+  --pink: #ec4899;
+  --success-bg: #f0fdf4;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden;
+}
+
+/* Loading State */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 16px;
+}
+.spinner {
+  width: 40px; height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 15px; color: var(--sub); font-weight: 500; }
+
+/* Error State */
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 32px;
+  text-align: center;
+}
+.error-icon { font-size: 48px; margin-bottom: 16px; }
+.error-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.error-desc { font-size: 14px; color: var(--sub); line-height: 1.5; }
+
+/* Main Container */
+.container {
+  width: 100%;
+  max-width: 420px;
+  padding: 0 20px;
+  display: none;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+.container.visible { display: flex; }
+
+/* Header */
+.header {
+  padding: 28px 0 20px;
+  text-align: center;
+  animation: fadeDown 0.5s ease both;
+}
+.logo-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.logo-dot {
+  width: 32px; height: 32px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #E8922A, #f0a848);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 3px 10px rgba(232,146,42,0.25);
+}
+.logo-text {
+  font-size: 20px; font-weight: 800; letter-spacing: -0.5px;
+}
+.logo-maid { color: var(--text); }
+.logo-smart { color: var(--accent); }
+
+.room-info {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.room-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+}
+.site-name {
+  font-size: 13px;
+  color: var(--sub);
+  font-weight: 500;
+}
+
+/* Prompt */
+.prompt {
+  text-align: center;
+  margin: 8px 0 20px;
+  animation: fadeDown 0.5s ease 0.15s both;
+}
+.prompt h2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+.prompt p {
+  font-size: 14px;
+  color: var(--sub);
+  margin-top: 4px;
+}
+
+/* Buttons */
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  padding-bottom: 32px;
+}
+
+.fb-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  border: 2px solid var(--border);
+  background: var(--card);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-user-select: none;
+  user-select: none;
+  animation: fadeUp 0.4s ease both;
+}
+.fb-btn:nth-child(1) { animation-delay: 0.1s; }
+.fb-btn:nth-child(2) { animation-delay: 0.15s; }
+.fb-btn:nth-child(3) { animation-delay: 0.2s; }
+.fb-btn:nth-child(4) { animation-delay: 0.25s; }
+.fb-btn:nth-child(5) { animation-delay: 0.3s; }
+
+.color-btn {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px 20px;
+  border: none;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.color-btn:hover {
+  border: none;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  transform: scale(1.02);
+}
+.color-btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.btn-icon {
+  font-size: 28px;
+}
+.btn-text {
+  font-size: 17px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.fb-btn:active {
+  transform: scale(0.97);
+}
+.fb-btn:hover {
+  border-color: var(--accent);
+  box-shadow: 0 2px 12px var(--accent-glow);
+}
+
+.fb-icon {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+.fb-label {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+.fb-sub {
+  font-size: 12px;
+  color: var(--sub);
+  font-weight: 500;
+  margin-top: 1px;
+}
+.fb-arrow {
+  margin-left: auto;
+  font-size: 18px;
+  color: var(--border);
+  transition: color 0.2s, transform 0.2s;
+}
+.fb-btn:hover .fb-arrow {
+  color: var(--accent);
+  transform: translateX(2px);
+}
+
+/* Success State */
+.success {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 32px;
+  text-align: center;
+}
+.success.visible { display: flex; }
+
+.success-check {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: var(--success-bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px;
+  margin-bottom: 20px;
+  animation: popIn 0.4s ease both;
+}
+.success h2 {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 8px;
+  animation: fadeUp 0.4s ease 0.2s both;
+}
+.success p {
+  font-size: 15px;
+  color: var(--sub);
+  line-height: 1.5;
+  animation: fadeUp 0.4s ease 0.3s both;
+}
+.success-room {
+  font-weight: 700;
+  color: var(--text);
+}
+.success-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  animation: fadeUp 0.4s ease 0.4s both;
+}
+.another-btn {
+  margin-top: 28px;
+  padding: 14px 32px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  background: var(--card);
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s;
+  animation: fadeUp 0.4s ease 0.5s both;
+}
+.another-btn:hover {
+  border-color: var(--accent);
+  box-shadow: 0 2px 12px var(--accent-glow);
+}
+
+/* Submitting overlay */
+.submitting {
+  position: fixed;
+  inset: 0;
+  background: rgba(250,248,245,0.9);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 100;
+}
+.submitting.visible { display: flex; }
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 16px 0 24px;
+  font-size: 11px;
+  color: var(--sub);
+  opacity: 0.6;
+}
+
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes popIn {
+  0% { opacity: 0; transform: scale(0.5); }
+  70% { transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading" id="loadingState">
+  <div class="spinner"></div>
+  <div class="loading-text">Loading restroom info...</div>
+</div>
+
+<!-- Error -->
+<div class="error-state" id="errorState" style="display:none">
+  <div class="error-icon">😕</div>
+  <div class="error-title">Restroom Not Found</div>
+  <div class="error-desc" id="errorDesc">We couldn't find this restroom. The QR code may be outdated or the link is incorrect.</div>
+</div>
+
+<!-- Main Form -->
+<div class="container" id="formState">
+  <div class="header">
+    <div class="logo-row">
+      <div class="logo-dot">💡</div>
+      <div><span class="logo-text logo-maid">Maid</span><span class="logo-text logo-smart">Smart</span></div>
+    </div>
+    <div class="room-info">
+      <div class="room-name" id="roomName">—</div>
+      <div class="site-name" id="roomSite">—</div>
+    </div>
+  </div>
+
+  <div class="prompt">
+    <h2>How's this restroom?</h2>
+    <p>Your feedback helps us keep it clean</p>
+  </div>
+
+  <div class="buttons" id="buttons">
+    <button class="fb-btn color-btn" style="background:#4CAF50" onclick="submit('Great Job!')">
+      <span class="btn-icon">👍</span>
+      <span class="btn-text">GREAT JOB!</span>
+    </button>
+    <button class="fb-btn color-btn" style="background:#E53935" onclick="submit('Soap or Paper Needed')">
+      <span class="btn-icon">🧴</span>
+      <span class="btn-text">SOAP / TOILET PAPER NEEDED</span>
+    </button>
+    <button class="fb-btn color-btn" style="background:#3949AB" onclick="submit('Report Leak')">
+      <span class="btn-icon">⚠️</span>
+      <span class="btn-text">REPORT LEAK</span>
+    </button>
+    <button class="fb-btn color-btn" style="background:#C5A829" onclick="submit('Clean-up is Needed')">
+      <span class="btn-icon">🧹</span>
+      <span class="btn-text">CLEAN-UP IS NEEDED</span>
+    </button>
+    <button class="fb-btn color-btn" style="background:#E8922A" onclick="submit('Toilet is Clogged')">
+      <span class="btn-icon">🚽</span>
+      <span class="btn-text">TOILET IS CLOGGED OR BROKEN</span>
+    </button>
+  </div>
+
+  <div class="footer">Powered by MaidSmart</div>
+</div>
+
+<!-- Success -->
+<div class="success" id="successState">
+  <div class="success-check">✅</div>
+  <h2>Thank You!</h2>
+  <p>Your feedback for <span class="success-room" id="successRoom">—</span> has been submitted. Our team has been notified.</p>
+  <div class="success-type" id="successType"></div>
+  <button class="another-btn" onclick="reset()">Submit Another</button>
+  <div class="footer" style="margin-top:auto;padding-top:40px">Powered by MaidSmart</div>
+</div>
+
+<!-- Submitting Overlay -->
+<div class="submitting" id="submittingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Submitting...</div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://lidntffmgtctjgiusgww.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZG50ZmZtZ3RjdGpnaXVzZ3d3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODM3OTAsImV4cCI6MjA4ODE1OTc5MH0.qhh0OArxEMaK0I0PudtdLqZC63CzVsafysaYKHkbbAA";
+
+let restroom = null;
+let siteName = "";
+
+const emojiMap = {
+  "Great Job!": "👍",
+  "Soap or Paper Needed": "🧴",
+  "Report Leak": "💧",
+  "Clean-up is Needed": "🧹",
+  "Toilet is Clogged": "🚽",
+};
+
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  const restroomId = params.get("r");
+
+  if (!restroomId) {
+    showError("No restroom specified. Please scan a valid QR code.");
+    return;
+  }
+
+  try {
+    // Look up restroom
+    const rrRes = await fetch(
+      SUPABASE_URL + "/rest/v1/restrooms?id=eq." + restroomId + "&select=*",
+      { headers: { apikey: SUPABASE_KEY, Authorization: "Bearer " + SUPABASE_KEY } }
+    );
+    const rrData = await rrRes.json();
+
+    if (!rrData || rrData.length === 0) {
+      showError("This restroom was not found in our system. The QR code may be outdated.");
+      return;
+    }
+
+    restroom = rrData[0];
+
+    // Look up site
+    if (restroom.site_id) {
+      const siteRes = await fetch(
+        SUPABASE_URL + "/rest/v1/sites?id=eq." + restroom.site_id + "&select=*",
+        { headers: { apikey: SUPABASE_KEY, Authorization: "Bearer " + SUPABASE_KEY } }
+      );
+      const siteData = await siteRes.json();
+      if (siteData && siteData.length > 0) {
+        siteName = siteData[0].name;
+      }
+    }
+
+    // Show form
+    document.getElementById("roomName").textContent = restroom.label || restroom.name;
+    document.getElementById("roomSite").textContent =
+      (restroom.floor ? restroom.floor + " • " : "") + (siteName || "");
+    document.getElementById("loadingState").style.display = "none";
+    document.getElementById("formState").classList.add("visible");
+
+  } catch (e) {
+    console.error("Init error:", e);
+    showError("Something went wrong loading this restroom. Please try again.");
+  }
+}
+
+function showError(msg) {
+  document.getElementById("loadingState").style.display = "none";
+  document.getElementById("errorDesc").textContent = msg;
+  document.getElementById("errorState").style.display = "flex";
+}
+
+async function submit(feedbackType) {
+  if (!restroom) return;
+
+  // Show submitting overlay
+  document.getElementById("submittingOverlay").classList.add("visible");
+
+  try {
+    const body = {
+      feedback_type: feedbackType,
+      restroom_id: restroom.id,
+      restroom_name: restroom.name,
+      site_name: siteName || null,
+      completed: feedbackType === "Great Job!" ? true : false,
+      time_completed: feedbackType === "Great Job!" ? new Date().toISOString() : null,
+    };
+
+    const res = await fetch(SUPABASE_URL + "/rest/v1/feedback", {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: "Bearer " + SUPABASE_KEY,
+        "Content-Type": "application/json",
+        Prefer: "return=representation",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) throw new Error("Failed to submit");
+
+    // Also trigger SMS/Pushover alert for non-positive feedback
+    if (feedbackType !== "Great Job!") {
+      triggerAlert(body);
+    }
+
+    // Show success
+    document.getElementById("submittingOverlay").classList.remove("visible");
+    document.getElementById("formState").classList.remove("visible");
+    document.getElementById("successRoom").textContent = restroom.label || restroom.name;
+    document.getElementById("successType").innerHTML =
+      (emojiMap[feedbackType] || "📋") + " " + feedbackType;
+    document.getElementById("successState").classList.add("visible");
+
+  } catch (e) {
+    console.error("Submit error:", e);
+    document.getElementById("submittingOverlay").classList.remove("visible");
+    alert("Something went wrong. Please try again.");
+  }
+}
+
+async function triggerAlert(feedback) {
+  // Fire and forget — try to send alert via Vercel endpoint
+  try {
+    fetch("https://maidsmart-api.vercel.app/api/send-pushover", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: feedback.restroom_id,
+        feedback: feedback.feedback_type,
+        restroom: feedback.restroom_name,
+        restroomId: feedback.restroom_id,
+        site: feedback.site_name,
+      }),
+    });
+  } catch (e) {
+    // Silent fail — alert is best-effort
+    console.log("Alert trigger failed:", e);
+  }
+}
+
+function reset() {
+  document.getElementById("successState").classList.remove("visible");
+  document.getElementById("formState").classList.add("visible");
+}
+
+init();
+</script>
+</body>
+</html>
