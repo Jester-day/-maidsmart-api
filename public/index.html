@@ -228,14 +228,14 @@ body { font-family: 'DM Sans', sans-serif; background: #f8f9fb; display: flex; h
       <div class="chart-card">
         <div class="chart-title">Account</div>
         <div style="font-size:14px;color:#334155;margin-bottom:8px">Chad Vazquez</div>
-        <div style="font-size:13px;color:#94a3b8;margin-bottom:4px">chadvbusiness@gmail.com</div>
+        <div style="font-size:13px;color:#94a3b8;margin-bottom:4px"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="caa9a2abaebca8bfb9a3a4afb9b98aada7aba3a6e4a9a5a7">[email&#160;protected]</a></div>
         <div style="font-size:13px;color:#94a3b8" id="accountSite">Honickman Center • Sodexo</div>
       </div>
     </div>
   </div>
 </main>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const SUPABASE_URL = "https://lidntffmgtctjgiusgww.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZG50ZmZtZ3RjdGpnaXVzZ3d3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODM3OTAsImV4cCI6MjA4ODE1OTc5MH0.qhh0OArxEMaK0I0PudtdLqZC63CzVsafysaYKHkbbAA";
 
@@ -404,7 +404,7 @@ function renderFeedbackTab() {
   const filterDiv = document.getElementById("filters");
   filterDiv.innerHTML = ["All", "Open", "Resolved", "Positive"].map(f =>
     `<button class="filter-btn ${currentFilter === f ? "active" : ""}" onclick="setFilter('${f}')">${f}</button>`
-  ).join("") + '<button class="export-btn">📥 Export CSV</button>';
+  ).join("") + '<button class="export-btn" onclick="quickExport()">📥 Export CSV</button>' + '<a href="export.html" target="_blank" class="export-btn" style="margin-left:8px;text-decoration:none;background:#E8922A">📊 Detailed Export</a>';
 
   let filtered = feedbackData;
   if (currentFilter === "Open") filtered = feedbackData.filter(f => !f.completed && f.feedback_type !== "Great Job!");
@@ -443,12 +443,41 @@ function switchTab(tabId) {
   const titles = { dashboard: "Dashboard", restrooms: "Restrooms", feedback: "Feedback Log", rooms: "Patient Rooms", settings: "Settings" };
   const subs = { dashboard: `Real-time overview • ${feedbackData.length} total entries`, restrooms: `${restroomsData.length} restrooms active`, feedback: `${feedbackData.length} entries`, rooms: "Coming soon", settings: "" };
   document.getElementById("pageTitle").textContent = titles[tabId];
-  document.getElementById("pageSubtitle").textContent = subs[tabId];
+  document.getElementById("pageSub").textContent = subs[tabId];
 }
 
 document.querySelectorAll(".nav-btn").forEach(btn => {
   btn.addEventListener("click", () => switchTab(btn.dataset.tab));
 });
+
+function quickExport(){
+  const headers=["Date","Time","Feedback Type","Restroom","Site","Completed","Time Completed","Response Time (min)"];
+  const rows=feedbackData.map(f=>{
+    const created=new Date(f.created_at);
+    const completed=f.time_completed?new Date(f.time_completed):null;
+    let respTime="";
+    if(completed&&f.feedback_type!=="Great Job!"){
+      const diff=Math.round((completed-created)/60000);
+      if(diff>0&&diff<1440)respTime=diff;
+    }
+    return[
+      created.toLocaleDateString(),
+      created.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}),
+      f.feedback_type,
+      f.restroom_name||"",
+      f.site_name||"",
+      f.completed?"Yes":"No",
+      completed?completed.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"",
+      respTime
+    ].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",");
+  });
+  const csv=headers.join(",")+"\n"+rows.join("\n");
+  const blob=new Blob([csv],{type:"text/csv"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="MaidSmart_Export_"+new Date().toISOString().split("T")[0]+".csv";
+  a.click();
+}
 
 loadData();
 </script>
