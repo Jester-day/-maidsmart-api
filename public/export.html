@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MaidSmart Export</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'DM Sans', sans-serif; background: #f8f9fb; min-height: 100vh; }
+
+.header { background: linear-gradient(135deg, #1a1a2e, #16213e); padding: 24px 40px; display: flex; align-items: center; justify-content: space-between; }
+.logo-row { display: flex; align-items: center; gap: 10px; }
+.logo-icon { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #E8922A, #f0a848); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.logo-maid { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: #fff; }
+.logo-smart { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: #E8922A; }
+.header-right { display: flex; gap: 10px; }
+.header-btn { padding: 8px 16px; border-radius: 8px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.btn-export { background: #22c55e; color: #fff; }
+.btn-export:hover { background: #16a34a; }
+.btn-print { background: rgba(255,255,255,0.15); color: #fff; }
+.btn-print:hover { background: rgba(255,255,255,0.25); }
+.btn-back { background: rgba(255,255,255,0.1); color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+
+.container { max-width: 1100px; margin: 0 auto; padding: 28px 40px; }
+
+.filters-card { background: #fff; border-radius: 16px; padding: 24px; border: 1px solid #f1f5f9; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.filters-title { font-size: 16px; font-weight: 700; color: #1a1a2e; margin-bottom: 16px; }
+.filters-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; }
+.filter-group { flex: 1; min-width: 160px; }
+.filter-label { font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 4px; display: block; }
+.filter-input { width: 100%; padding: 9px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; color: #1a1a2e; outline: none; }
+.filter-input:focus { border-color: #2D7DD2; }
+.filter-btn { padding: 9px 20px; border-radius: 8px; border: none; background: #2D7DD2; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.filter-btn:hover { background: #2568b0; }
+.filter-reset { padding: 9px 16px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
+/* Summary Stats */
+.stats-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 20px; }
+.stat-card { background: #fff; border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #f1f5f9; }
+.stat-val { font-size: 28px; font-weight: 800; font-family: 'Space Grotesk', sans-serif; }
+.stat-label { font-size: 11px; color: #94a3b8; margin-top: 2px; font-weight: 500; }
+
+/* Table */
+.table-card { background: #fff; border-radius: 16px; padding: 24px; border: 1px solid #f1f5f9; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.table-title { font-size: 16px; font-weight: 700; color: #1a1a2e; }
+.table-count { font-size: 13px; color: #94a3b8; }
+
+.table { width: 100%; border-collapse: collapse; }
+.table th { text-align: left; font-size: 11px; font-weight: 600; color: #94a3b8; padding: 8px 10px; border-bottom: 2px solid #f1f5f9; text-transform: uppercase; letter-spacing: 0.5px; }
+.table td { padding: 10px; border-bottom: 1px solid #f8fafc; font-size: 13px; color: #334155; }
+.table tr:hover { background: #fafafa; }
+
+.badge { padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; display: inline-block; }
+.badge-green { background: #f0fdf4; color: #22c55e; }
+.badge-red { background: #fef2f2; color: #ef4444; }
+.badge-blue { background: #eff6ff; color: #2D7DD2; }
+.badge-yellow { background: #fefce8; color: #ca8a04; }
+.badge-purple { background: #faf5ff; color: #a855f7; }
+.badge-pink { background: #fdf2f8; color: #ec4899; }
+
+.emoji-cell { display: flex; align-items: center; gap: 8px; }
+.emoji-dot { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+
+.empty { text-align: center; padding: 40px; color: #94a3b8; font-size: 14px; }
+
+@media print {
+  .header { display: none; }
+  .filters-card { display: none; }
+  .container { padding: 0; max-width: 100%; }
+  .table-card { box-shadow: none; border: none; padding: 0; }
+  .stat-card { border: 1px solid #ddd; }
+  body { background: #fff; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-row">
+    <div class="logo-icon">💡</div>
+    <span class="logo-maid">Maid</span><span class="logo-smart">Smart</span>
+    <span style="color:rgba(255,255,255,0.4);font-size:14px;margin-left:12px">Export Center</span>
+  </div>
+  <div class="header-right">
+    <a href="index.html" class="header-btn btn-back">← Dashboard</a>
+    <button class="header-btn btn-print" onclick="window.print()">🖨️ Print</button>
+    <button class="header-btn btn-export" onclick="exportCSV()">📥 Export CSV</button>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Filters -->
+  <div class="filters-card">
+    <div class="filters-title">Filter & Date Range</div>
+    <div class="filters-row">
+      <div class="filter-group">
+        <label class="filter-label">Date From</label>
+        <input type="date" class="filter-input" id="dateFrom">
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Date To</label>
+        <input type="date" class="filter-input" id="dateTo">
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Site</label>
+        <select class="filter-input" id="filterSite"><option value="">All Sites</option></select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Feedback Type</label>
+        <select class="filter-input" id="filterType">
+          <option value="">All Types</option>
+          <option value="Great Job!">Great Job!</option>
+          <option value="Soap or Paper Needed">Supplies Needed</option>
+          <option value="Report Leak">Leak Reported</option>
+          <option value="Clean-up is Needed">Clean-up Needed</option>
+          <option value="Toilet is Clogged">Toilet Clogged</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Status</label>
+        <select class="filter-input" id="filterStatus">
+          <option value="">All</option>
+          <option value="open">Open</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+      <button class="filter-btn" onclick="applyFilters()">Apply</button>
+      <button class="filter-reset" onclick="resetFilters()">Reset</button>
+    </div>
+    <!-- Quick date buttons -->
+    <div style="margin-top:12px;display:flex;gap:8px">
+      <button class="filter-reset" onclick="setRange(7)">Last 7 days</button>
+      <button class="filter-reset" onclick="setRange(30)">Last 30 days</button>
+      <button class="filter-reset" onclick="setRange(90)">Last 90 days</button>
+      <button class="filter-reset" onclick="setRange(365)">Last year</button>
+      <button class="filter-reset" onclick="setRange(0)">All time</button>
+    </div>
+  </div>
+
+  <!-- Summary Stats -->
+  <div class="stats-row" id="statsRow"></div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <div class="table-header">
+      <div class="table-title">Feedback Data</div>
+      <div class="table-count" id="tableCount">0 entries</div>
+    </div>
+    <table class="table">
+      <thead><tr>
+        <th>Date</th><th>Time</th><th>Type</th><th>Restroom</th><th>Site</th><th>Status</th><th>Response Time</th>
+      </tr></thead>
+      <tbody id="dataTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const SB="https://lidntffmgtctjgiusgww.supabase.co";
+const KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZG50ZmZtZ3RjdGpnaXVzZ3d3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODM3OTAsImV4cCI6MjA4ODE1OTc5MH0.qhh0OArxEMaK0I0PudtdLqZC63CzVsafysaYKHkbbAA";
+
+let allFeedback=[];
+let filtered=[];
+let sites=[];
+
+const meta={
+  "Great Job!":{emoji:"👍",bg:"#f0fdf4",badge:"badge-green"},
+  "Soap or Paper Needed":{emoji:"🧴",bg:"#fefce8",badge:"badge-yellow"},
+  "Report Leak":{emoji:"💧",bg:"#eff6ff",badge:"badge-blue"},
+  "Clean-up is Needed":{emoji:"🧹",bg:"#faf5ff",badge:"badge-purple"},
+  "Toilet is Clogged":{emoji:"🚽",bg:"#fdf2f8",badge:"badge-pink"},
+};
+const getMeta=t=>meta[t]||{emoji:"📋",bg:"#f8fafc",badge:"badge-blue"};
+
+async function loadData(){
+  const[fb,st]=await Promise.all([
+    fetch(SB+"/rest/v1/feedback?order=created_at.desc",{headers:{apikey:KEY,Authorization:"Bearer "+KEY}}).then(r=>r.json()),
+    fetch(SB+"/rest/v1/sites?order=name.asc",{headers:{apikey:KEY,Authorization:"Bearer "+KEY}}).then(r=>r.json()),
+  ]);
+  allFeedback=fb||[];
+  sites=st||[];
+  document.getElementById("filterSite").innerHTML='<option value="">All Sites</option>'+sites.map(s=>`<option value="${s.name}">${s.name}</option>`).join("");
+  filtered=allFeedback;
+  render();
+}
+
+function setRange(days){
+  if(days===0){
+    document.getElementById("dateFrom").value="";
+    document.getElementById("dateTo").value="";
+  }else{
+    const to=new Date();
+    const from=new Date();from.setDate(from.getDate()-days);
+    document.getElementById("dateFrom").value=from.toISOString().split("T")[0];
+    document.getElementById("dateTo").value=to.toISOString().split("T")[0];
+  }
+  applyFilters();
+}
+
+function applyFilters(){
+  const from=document.getElementById("dateFrom").value;
+  const to=document.getElementById("dateTo").value;
+  const site=document.getElementById("filterSite").value;
+  const type=document.getElementById("filterType").value;
+  const status=document.getElementById("filterStatus").value;
+
+  filtered=allFeedback.filter(f=>{
+    if(from&&new Date(f.created_at)<new Date(from))return false;
+    if(to){const toEnd=new Date(to);toEnd.setHours(23,59,59);if(new Date(f.created_at)>toEnd)return false;}
+    if(site&&f.site_name!==site)return false;
+    if(type&&f.feedback_type!==type)return false;
+    if(status==="open"&&(f.completed||f.feedback_type==="Great Job!"))return false;
+    if(status==="completed"&&!f.completed)return false;
+    return true;
+  });
+  render();
+}
+
+function resetFilters(){
+  document.getElementById("dateFrom").value="";
+  document.getElementById("dateTo").value="";
+  document.getElementById("filterSite").value="";
+  document.getElementById("filterType").value="";
+  document.getElementById("filterStatus").value="";
+  filtered=allFeedback;
+  render();
+}
+
+function calcResponseTime(f){
+  if(!f.time_completed||f.feedback_type==="Great Job!")return null;
+  const diff=Math.round((new Date(f.time_completed)-new Date(f.created_at))/60000);
+  return(diff>0&&diff<1440)?diff:null;
+}
+
+function render(){
+  // Stats
+  const total=filtered.length;
+  const positive=filtered.filter(f=>f.feedback_type==="Great Job!").length;
+  const issues=filtered.filter(f=>f.feedback_type!=="Great Job!").length;
+  const open=filtered.filter(f=>!f.completed&&f.feedback_type!=="Great Job!").length;
+  const resolved=filtered.filter(f=>f.completed).length;
+  const times=filtered.map(calcResponseTime).filter(t=>t!==null&&t>0);
+  const avgResp=times.length?Math.round(times.reduce((a,b)=>a+b,0)/times.length):0;
+
+  document.getElementById("statsRow").innerHTML=[
+    {label:"Total Entries",val:total,color:"#1a1a2e"},
+    {label:"Positive",val:positive,color:"#22c55e"},
+    {label:"Issues",val:issues,color:"#ef4444"},
+    {label:"Open",val:open,color:"#E8922A"},
+    {label:"Resolved",val:resolved,color:"#2D7DD2"},
+    {label:"Avg Response",val:avgResp>0?avgResp+" min":"N/A",color:"#a855f7"},
+  ].map(s=>`<div class="stat-card"><div class="stat-val" style="color:${s.color}">${s.val}</div><div class="stat-label">${s.label}</div></div>`).join("");
+
+  document.getElementById("tableCount").textContent=total+" entries";
+
+  // Table
+  const tb=document.getElementById("dataTable");
+  if(!filtered.length){tb.innerHTML='<tr><td colspan="7"><div class="empty">No feedback matches your filters</div></td></tr>';return;}
+  tb.innerHTML=filtered.map(f=>{
+    const m=getMeta(f.feedback_type);
+    const d=new Date(f.created_at);
+    const rt=calcResponseTime(f);
+    const isOpen=!f.completed&&f.feedback_type!=="Great Job!";
+    return`<tr>
+      <td>${d.toLocaleDateString()}</td>
+      <td>${d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</td>
+      <td><div class="emoji-cell"><div class="emoji-dot" style="background:${m.bg}">${m.emoji}</div>${f.feedback_type}</div></td>
+      <td>${f.restroom_name||"—"}</td>
+      <td>${f.site_name||"—"}</td>
+      <td><span class="badge ${isOpen?"badge-red":"badge-green"}">${isOpen?"Open":"Done"}</span></td>
+      <td>${rt!==null&&rt>0?rt+" min":"—"}</td>
+    </tr>`;
+  }).join("");
+}
+
+function exportCSV(){
+  const headers=["Date","Time","Feedback Type","Restroom","Site","Status","Completed At","Response Time (min)"];
+  const rows=filtered.map(f=>{
+    const d=new Date(f.created_at);
+    const ct=f.time_completed?new Date(f.time_completed):null;
+    const rt=calcResponseTime(f);
+    const isOpen=!f.completed&&f.feedback_type!=="Great Job!";
+    return[
+      d.toLocaleDateString(),
+      d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}),
+      f.feedback_type,
+      f.restroom_name||"",
+      f.site_name||"",
+      isOpen?"Open":"Completed",
+      ct?ct.toLocaleString():"",
+      rt!==null&&rt>0?rt:""
+    ].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",");
+  });
+
+  // Add summary at top
+  const positive=filtered.filter(f=>f.feedback_type==="Great Job!").length;
+  const issues=filtered.filter(f=>f.feedback_type!=="Great Job!").length;
+  const open=filtered.filter(f=>!f.completed&&f.feedback_type!=="Great Job!").length;
+  const times=filtered.map(calcResponseTime).filter(t=>t!==null&&t>0);
+  const avgResp=times.length?Math.round(times.reduce((a,b)=>a+b,0)/times.length):0;
+  
+  const summary=[
+    '"MaidSmart Feedback Export"',
+    '"Generated: '+new Date().toLocaleString()+'"',
+    '"Total Entries: '+filtered.length+'"',
+    '"Positive: '+positive+'"',
+    '"Issues: '+issues+'"',
+    '"Open: '+open+'"',
+    '"Avg Response Time: '+(avgResp>0?avgResp+' min':'N/A')+'"',
+    '',
+  ];
+
+  const csv=summary.join("\n")+"\n"+headers.join(",")+"\n"+rows.join("\n");
+  const blob=new Blob([csv],{type:"text/csv"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  
+  // Filename includes date range if set
+  const from=document.getElementById("dateFrom").value;
+  const to=document.getElementById("dateTo").value;
+  let fname="MaidSmart_Export";
+  if(from||to)fname+="_"+(from||"start")+"_to_"+(to||"today");
+  fname+="_"+new Date().toISOString().split("T")[0]+".csv";
+  
+  a.download=fname;
+  a.click();
+}
+
+loadData();
+</script>
+</body>
+</html>
