@@ -156,9 +156,10 @@ body { font-family: 'DM Sans', sans-serif; background: #f8f9fb; display: flex; h
     <button class="refresh-btn" onclick="loadData()">🔄 Refresh Data</button>
     <div class="user-card">
       <div class="user-label">Logged in as</div>
-      <div class="user-name">Chad Vazquez</div>
+      <div class="user-name" id="userName">Loading...</div>
       <div class="user-role">EVS Manager</div>
     </div>
+    <button class="refresh-btn" onclick="logout()" style="margin-top:8px;color:#ef4444;border-color:rgba(239,68,68,0.2)">🚪 Logout</button>
   </div>
 </aside>
 
@@ -236,6 +237,11 @@ body { font-family: 'DM Sans', sans-serif; background: #f8f9fb; display: flex; h
 </main>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ═══ AUTH GUARD ═══
+const _s=localStorage.getItem("maidsmart_session");
+if(!_s){window.location.href="login.html";}else{try{const s=JSON.parse(_s);if(!s.access_token||Date.now()>s.expires_at){localStorage.removeItem("maidsmart_session");window.location.href="login.html";}}catch(e){localStorage.removeItem("maidsmart_session");window.location.href="login.html";}}
+function logout(){localStorage.removeItem("maidsmart_session");window.location.href="login.html";}
+
 const SUPABASE_URL = "https://lidntffmgtctjgiusgww.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZG50ZmZtZ3RjdGpnaXVzZ3d3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODM3OTAsImV4cCI6MjA4ODE1OTc5MH0.qhh0OArxEMaK0I0PudtdLqZC63CzVsafysaYKHkbbAA";
 
@@ -289,6 +295,8 @@ async function loadData() {
     feedbackData = fb || [];
     restroomsData = rooms || [];
     siteData = sites && sites[0] ? sites[0] : null;
+    // Set user name from session
+    try{const ss=JSON.parse(localStorage.getItem("maidsmart_session"));if(ss&&ss.user)document.getElementById("userName").textContent=ss.user.email.split("@")[0].replace(/\./g," ").replace(/\b\w/g,c=>c.toUpperCase());}catch(e){}
     render();
   } catch (e) { console.error("Load error:", e); }
 }

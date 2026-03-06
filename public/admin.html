@@ -249,6 +249,11 @@ select.form-input { cursor: pointer; }
 <div class="toast" id="toast"></div>
 
 <script>
+// ═══ AUTH GUARD ═══
+const _s=localStorage.getItem("maidsmart_session");
+if(!_s){window.location.href="login.html";}else{try{const s=JSON.parse(_s);if(!s.access_token||Date.now()>s.expires_at){localStorage.removeItem("maidsmart_session");window.location.href="login.html";}}catch(e){localStorage.removeItem("maidsmart_session");window.location.href="login.html";}}
+function logout(){localStorage.removeItem("maidsmart_session");window.location.href="login.html";}
+
 const SB="https://lidntffmgtctjgiusgww.supabase.co";
 const KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZG50ZmZtZ3RjdGpnaXVzZ3d3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODM3OTAsImV4cCI6MjA4ODE1OTc5MH0.qhh0OArxEMaK0I0PudtdLqZC63CzVsafysaYKHkbbAA";
 const FB="https://maidsmart-api.vercel.app/feedback.html";

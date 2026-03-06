@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MaidSmart — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root { --bg: #f8f9fb; --accent: #E8922A; --dark: #1a1a2e; --sub: #94a3b8; --border: #e2e8f0; --card: #fff; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Outfit', sans-serif; background: var(--bg); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+
+.login-container {
+  width: 100%; max-width: 420px; padding: 20px;
+}
+.login-card {
+  background: var(--card); border-radius: 20px; padding: 40px 36px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.08); border: 1px solid #f1f5f9;
+  animation: fadeUp 0.5s ease both;
+}
+.logo-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 32px; }
+.logo-icon {
+  width: 48px; height: 48px; border-radius: 14px;
+  background: linear-gradient(135deg, #E8922A, #f0a848);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; box-shadow: 0 4px 14px rgba(232,146,42,0.3);
+}
+.logo-text { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+.logo-maid { color: var(--dark); }
+.logo-smart { color: var(--accent); }
+
+.welcome { text-align: center; margin-bottom: 28px; }
+.welcome h2 { font-size: 22px; font-weight: 700; color: var(--dark); margin-bottom: 4px; }
+.welcome p { font-size: 14px; color: var(--sub); }
+
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 13px; font-weight: 600; color: #64748b; margin-bottom: 6px; }
+.form-input {
+  width: 100%; padding: 13px 16px; border: 2px solid var(--border);
+  border-radius: 12px; font-size: 15px; font-family: 'Outfit', sans-serif;
+  color: var(--dark); outline: none; transition: border-color 0.2s;
+}
+.form-input:focus { border-color: var(--accent); }
+.form-input::placeholder { color: #c8cdd3; }
+
+.login-btn {
+  width: 100%; padding: 14px; border: none; border-radius: 12px;
+  background: linear-gradient(135deg, #E8922A, #f0a848);
+  color: #fff; font-size: 16px; font-weight: 700;
+  font-family: 'Outfit', sans-serif; cursor: pointer;
+  transition: all 0.2s; margin-top: 8px;
+  box-shadow: 0 4px 14px rgba(232,146,42,0.3);
+}
+.login-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(232,146,42,0.4); }
+.login-btn:active { transform: translateY(0); }
+.login-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.error-msg {
+  background: #fef2f2; color: #ef4444; padding: 10px 14px;
+  border-radius: 10px; font-size: 13px; font-weight: 500;
+  margin-bottom: 16px; display: none; text-align: center;
+}
+.error-msg.visible { display: block; animation: shake 0.3s ease; }
+
+.footer { text-align: center; margin-top: 24px; font-size: 12px; color: var(--sub); }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+</style>
+</head>
+<body>
+
+<div class="login-container">
+  <div class="login-card">
+    <div class="logo-row">
+      <div class="logo-icon">💡</div>
+      <div><span class="logo-text logo-maid">Maid</span><span class="logo-text logo-smart">Smart</span></div>
+    </div>
+    <div class="welcome">
+      <h2>Welcome Back</h2>
+      <p>Sign in to your dashboard</p>
+    </div>
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input type="email" class="form-input" id="email" placeholder="you@company.com" autofocus>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input type="password" class="form-input" id="password" placeholder="••••••••">
+    </div>
+    <button class="login-btn" id="loginBtn" onclick="login()">Sign In</button>
+    <div class="footer">Powered by MaidSmart</div>
+  </div>
+</div>
+
+<script>
+const SB="https://lidntffmgtctjgiusgww.supabase.co";
+const KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZG50ZmZtZ3RjdGpnaXVzZ3d3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODM3OTAsImV4cCI6MjA4ODE1OTc5MH0.qhh0OArxEMaK0I0PudtdLqZC63CzVsafysaYKHkbbAA";
+
+// Check if already logged in
+const existing = localStorage.getItem("maidsmart_session");
+if(existing){
+  try{
+    const s=JSON.parse(existing);
+    if(s.access_token) window.location.href="index.html";
+  }catch(e){}
+}
+
+// Enter key triggers login
+document.getElementById("password").addEventListener("keydown",e=>{if(e.key==="Enter")login();});
+document.getElementById("email").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("password").focus();});
+
+function showError(msg){
+  const el=document.getElementById("errorMsg");
+  el.textContent=msg;
+  el.classList.add("visible");
+}
+
+async function login(){
+  const email=document.getElementById("email").value.trim();
+  const pass=document.getElementById("password").value;
+  const btn=document.getElementById("loginBtn");
+  const errEl=document.getElementById("errorMsg");
+  errEl.classList.remove("visible");
+
+  if(!email||!pass)return showError("Enter your email and password");
+
+  btn.disabled=true;
+  btn.textContent="Signing in...";
+
+  try{
+    const res=await fetch(SB+"/auth/v1/token?grant_type=password",{
+      method:"POST",
+      headers:{"Content-Type":"application/json",apikey:KEY},
+      body:JSON.stringify({email,password:pass})
+    });
+    const data=await res.json();
+
+    if(!res.ok){
+      btn.disabled=false;
+      btn.textContent="Sign In";
+      showError(data.error_description||data.msg||"Invalid email or password");
+      return;
+    }
+
+    // Store session
+    localStorage.setItem("maidsmart_session",JSON.stringify({
+      access_token:data.access_token,
+      refresh_token:data.refresh_token,
+      user:data.user,
+      expires_at:Date.now()+(data.expires_in*1000)
+    }));
+
+    // Redirect to dashboard
+    window.location.href="index.html";
+
+  }catch(e){
+    btn.disabled=false;
+    btn.textContent="Sign In";
+    showError("Connection error. Please try again.");
+  }
+}
+</script>
+</body>
+</html>
