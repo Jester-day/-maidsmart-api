@@ -528,9 +528,12 @@ async function submit(feedbackType) {
 
     if (!res.ok) throw new Error("Failed to submit");
 
+    const savedData = await res.json();
+    const savedId = savedData && savedData.length > 0 ? savedData[0].id : null;
+
     // Also trigger SMS/Pushover alert for non-positive feedback
     if (feedbackType !== "Great Job!") {
-      triggerAlert(body);
+      triggerAlert(body, savedId);
     }
 
     // Show success
@@ -548,14 +551,14 @@ async function submit(feedbackType) {
   }
 }
 
-async function triggerAlert(feedback) {
+async function triggerAlert(feedback, feedbackId) {
   // Fire and forget — try to send alert via Vercel endpoint
   try {
     fetch("https://maidsmart-api.vercel.app/api/send-pushover", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        id: feedback.restroom_id,
+        id: feedbackId,
         feedback: feedback.feedback_type,
         restroom: feedback.restroom_name,
         restroomId: feedback.restroom_id,
@@ -563,7 +566,6 @@ async function triggerAlert(feedback) {
       }),
     });
   } catch (e) {
-    // Silent fail — alert is best-effort
     console.log("Alert trigger failed:", e);
   }
 }
